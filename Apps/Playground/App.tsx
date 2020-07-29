@@ -34,6 +34,7 @@ const EngineScreen: FunctionComponent<ViewProps> = (props: ViewProps) => {
   const anchor = useRef<any>();
   const anchorCreated = useRef<boolean>(false);
   const planeTexture = useRef<BABYLON.Texture>(null);
+  const planeMat = useRef<BABYLON.Material>(null);
 
   useEffect(() => {
     if (engine) {
@@ -57,6 +58,9 @@ const EngineScreen: FunctionComponent<ViewProps> = (props: ViewProps) => {
       planeTexture.current.uScale = 3;
       planeTexture.current.vScale = 3;
       planeTexture.current.coordinatesMode = BABYLON.Texture.PROJECTION_MODE;
+
+      planeMat.current = new BABYLON.StandardMaterial('noLight', scene.current);
+      planeMat.current.diffuseTexture = planeTexture.current;
 
       createInputHandling();
     }
@@ -206,7 +210,7 @@ const EngineScreen: FunctionComponent<ViewProps> = (props: ViewProps) => {
 
           xrPlanes.onPlaneAddedObservable.add(webXRPlane => {
             if (scene.current) {
-              console.log("Got new plane.");
+              console.log("Plane added.");
               let plane : any = webXRPlane;
               webXRPlane.polygonDefinition.push(webXRPlane.polygonDefinition[0]);
               try {
@@ -214,9 +218,7 @@ const EngineScreen: FunctionComponent<ViewProps> = (props: ViewProps) => {
                 let tubeMesh : BABYLON.Mesh =  BABYLON.TubeBuilder.CreateTube("tube", { path: plane.polygonDefinition, radius: 0.005, sideOrientation: BABYLON.Mesh.FRONTSIDE, updatable: true }, scene.current);
                 tubeMesh.setParent(plane.mesh);                
                 planes[plane.id] = (plane.mesh);
-                const mat = new BABYLON.StandardMaterial('noLight', scene.current);
-                mat.diffuseTexture = planeTexture.current;
-                plane.mesh.material = mat;
+                plane.mesh.material = planeMat.current;
         
                 plane.mesh.rotationQuaternion = new BABYLON.Quaternion();
                 plane.transformationMatrix.decompose(plane.mesh.scaling, plane.mesh.rotationQuaternion, plane.mesh.position);
@@ -229,25 +231,24 @@ const EngineScreen: FunctionComponent<ViewProps> = (props: ViewProps) => {
           });
       
           xrPlanes.onPlaneUpdatedObservable.add(webXRPlane => {
-            console.log("Got plane update.");
+            console.log("Plane updated.");
             let plane : any = webXRPlane;
-              let mat;
               if (plane.mesh) {
-                  mat = plane.mesh.material;
                   plane.mesh.dispose(false, false);
               }
+              
               const some = plane.polygonDefinition.some((p: any) => !p);
               if (some) {
                   return;
               }
-              
+
               plane.polygonDefinition.push(plane.polygonDefinition[0]);
               try {
                 plane.mesh = BABYLON.MeshBuilder.CreatePolygon("plane", { shape : plane.polygonDefinition }, scene.current, earcut);
                 let tubeMesh : BABYLON.Mesh =  BABYLON.TubeBuilder.CreateTube("tube", { path: plane.polygonDefinition, radius: 0.005, sideOrientation: BABYLON.Mesh.FRONTSIDE, updatable: true }, scene.current);
                 tubeMesh.setParent(plane.mesh);
                 planes[plane.id] = (plane.mesh);
-                plane.mesh.material = mat;
+                plane.mesh.material = planeMat.current;
                 plane.mesh.rotationQuaternion = new BABYLON.Quaternion();
                 plane.transformationMatrix.decompose(plane.mesh.scaling, plane.mesh.rotationQuaternion, plane.mesh.position);
                 plane.mesh.receiveShadows = true;
@@ -264,7 +265,7 @@ const EngineScreen: FunctionComponent<ViewProps> = (props: ViewProps) => {
               if (plane && planes[plane.id]) {
                   planes[plane.id].dispose()
               }
-          });   
+          });
 
           const xrAnchorModule = xr.baseExperience.featuresManager.enableFeature(
               BABYLON.WebXRFeatureName.ANCHOR_SYSTEM,
