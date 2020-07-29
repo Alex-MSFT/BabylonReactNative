@@ -1,3 +1,8 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable quotes */
+/* eslint-disable prettier/prettier */
 /**
  * Generated with the TypeScript template
  * https://github.com/react-native-community/react-native-template-typescript
@@ -11,30 +16,16 @@ import { SafeAreaView, View, ViewProps, StyleSheet } from 'react-native';
 import { EngineView, useEngine } from '@babylonjs/react-native';
 import * as BABYLON from '@babylonjs/core';
 import { NavBar } from "./components/NavBar";
-import { TeachingMoment, TeachingMomentType } from "./components/TeachingMoment";
-import { CameraButton } from "./components/CameraButton";
 import { sceneCookie, SampleScene } from './SampleScene';
-import { WebXRAnchorSystem } from '@babylonjs/core';
 const earcut = require('earcut');
 
 const EngineScreen: FunctionComponent<ViewProps> = (props: ViewProps) => {
   const engine = useEngine();
-  const [teachingMomentVisible, setTeachingMomentVisible] = useState(false);
   const [camera, setCamera] = useState<BABYLON.ArcRotateCamera>();
   const model = useRef<BABYLON.AbstractMesh>();
   const placementIndicator = useRef<BABYLON.AbstractMesh>();
-  const scene = useRef<BABYLON.Scene>();
-  const xrSession = useRef<BABYLON.WebXRSessionManager>();
-  const deviceSourceManager = useRef<BABYLON.DeviceSourceManager>();
-  const modelPlaced = useRef(false);
-  const [showARControls, setShowARControls] = useState(false);
-  const targetScale = useRef(.25);
   const sampleScene = useRef<SampleScene>();
   const sampleCookie = useRef<number>(sceneCookie);
-  const anchor = useRef<any>();
-  const anchorCreated = useRef<boolean>(false);
-  const planeTexture = useRef<BABYLON.Texture>(null);
-  const planeMat = useRef<BABYLON.Material>(null);
 
   useEffect(() => {
     if (engine) {
@@ -45,282 +36,29 @@ const EngineScreen: FunctionComponent<ViewProps> = (props: ViewProps) => {
   const initializeScene = async () => {
     if (engine) {
       sampleScene.current = new SampleScene(engine);
+      sampleScene.current.earcut = earcut;
       await sampleScene.current.initializeSceneAsync();
 
       // Pull all of the member variables out into our useRefs.
-      scene.current = sampleScene.current.scene;
       setCamera(sampleScene.current.camera);
       model.current = sampleScene.current.model;
-      placementIndicator.current = sampleScene.current.placementIndicator;      
-      targetScale.current = sampleScene.current.targetScale;
-      planeTexture.current = new BABYLON.Texture('https://i.imgur.com/z7s3C5B.png', scene.current);
-      planeTexture.current.hasAlpha = true;
-      planeTexture.current.uScale = 3;
-      planeTexture.current.vScale = 3;
-      planeTexture.current.coordinatesMode = BABYLON.Texture.PROJECTION_MODE;
-
-      planeMat.current = new BABYLON.StandardMaterial('noLight', scene.current);
-      planeMat.current.diffuseTexture = planeTexture.current;
-
-      createInputHandling();
+      placementIndicator.current = sampleScene.current.placementIndicator;
     }
   };
 
-  const placeModel = useCallback(() => {
-    if (xrSession.current && !modelPlaced.current && placementIndicator.current && placementIndicator.current.isEnabled() && model.current && scene.current) {
-      setTeachingMomentVisible(false);
-      modelPlaced.current = true;
-      model.current.rotationQuaternion = BABYLON.Quaternion.Identity();
-      placementIndicator.current.setEnabled(false);
-      model.current.setEnabled(true);
-      model.current.position = placementIndicator.current.position.clone();
-      model.current.position.y += targetScale.current / 2;
-      model.current.scalingDeterminant = 0;
-
-      const startTime = Date.now();
-      scene.current.beforeRender = function () {
-        if (model.current && model.current.scalingDeterminant < targetScale.current) {
-          const newScale = targetScale.current * (Date.now() - startTime) / 500;
-          model.current.scalingDeterminant = newScale > targetScale.current ? targetScale.current: newScale;
-          model.current.markAsDirty("scaling")
-        }
-    };      
-    }
-  }, [scene.current, camera, model.current, xrSession.current, modelPlaced.current]);
-
-  const createInputHandling = () => {
-      if (engine && scene.current) {
-        if (!deviceSourceManager.current) { 
-          deviceSourceManager.current = new BABYLON.DeviceSourceManager(engine);
-        }
-
-        deviceSourceManager.current.onAfterDeviceConnectedObservable.clear();
-        deviceSourceManager.current.onAfterDeviceDisconnectedObservable.clear();
-
-        var numInputs = 0;
-
-        // Bind touch event.
-        deviceSourceManager.current.onAfterDeviceConnectedObservable.add(deviceEventData => {
-          numInputs++;
-
-          // Identify the touch event ID that was just added, and bind to its update event.
-          deviceSourceManager.current?.getDeviceSource(deviceEventData.deviceType, deviceEventData.deviceSlot)?.onInputChangedObservable.add(inputEventData => {
-            if (inputEventData && model.current && modelPlaced.current && xrSession.current && inputEventData.previousState !== null && inputEventData.currentState !== null) {
-              // Calculate the differential between two states.
-              const diff = inputEventData.previousState - inputEventData.currentState;
-              
-              // Single input, do translation.
-              if (numInputs == 1) {
-                if (inputEventData.inputIndex == BABYLON.PointerInput.Horizontal)
-                {
-                  model.current.position.x -= diff / 1000;
-                }
-                else 
-                {
-                  model.current.position.z += diff / 750;
-                }
-              }
-              // Multi-input do rotation.
-              else if (numInputs == 2 && inputEventData.inputIndex == BABYLON.PointerInput.Horizontal && deviceEventData.deviceSlot == 0) {
-                model.current.rotate(BABYLON.Vector3.Up(), diff / 200);
-              }
-            }
-          });
-
-        placeModel(); 
-        });
-
-      deviceSourceManager.current.onAfterDeviceDisconnectedObservable.add(deviceEventData => {
-        numInputs--;
-      })
+  const resetClick = () => {
+    if (sampleScene.current)
+    {
+      sampleScene.current.resetClick();
     }
   };
 
-  const resetClick = useCallback(() => {
-    setTeachingMomentVisible(false);
-    if (model.current && camera && scene.current && placementIndicator.current) {
-      if (xrSession.current)
-      {
-        modelPlaced.current = false;
-        model.current.setEnabled(false);
-        placementIndicator.current.setEnabled(true);
-      }
-      else
-      {
-        placementIndicator.current?.setEnabled(false);
-        sampleScene.current?.reset2D();
-      }
+  const onToggleXr = () => {
+    if (sampleScene.current)
+    {
+      sampleScene.current.onToggleXr();
     }
-  }, [model.current, camera, scene.current, xrSession.current]);
-
-  const styles = StyleSheet.create({
-    arView: {
-        flex: 1,
-        flexDirection: "column",
-        justifyContent: "center"
-    },
-    teachingMomentView: {
-        flex: 1,
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        justifyContent: "center",
-        alignItems: "center",
-        alignSelf: "center",
-    },
-    placementBarContainer: {
-      position: 'absolute', minHeight: 50, margin: 10, left: 0, right: 0, bottom: 0,
-        justifyContent: "center",
-        alignItems: "center",
-        alignSelf: "center"
-    },
-    cameraButton: {
-        height: 60,
-        width: 60,
-        marginVertical: 8
-    }
-});
-
-  const onToggleXr = useCallback(() => {
-    (async () => {
-      if (xrSession.current) {
-        model.current?.setEnabled(false);
-        placementIndicator.current?.setEnabled(false);
-
-        await xrSession.current.exitXRAsync();
-        
-        xrSession.current = undefined;
-        modelPlaced.current = true;
-        setTeachingMomentVisible(false);
-        setShowARControls(false);
-        sampleScene.current?.reset2D();
-      } else {
-        if (model.current && scene.current && placementIndicator.current) {
-          const xr = await scene.current.createDefaultXRExperienceAsync({ disableDefaultUI: true, disableTeleportation: true })
-          // Set up the hit test.
-          const xrHitTestModule = xr.baseExperience.featuresManager.enableFeature(
-            BABYLON.WebXRFeatureName.HIT_TEST,
-            "latest",
-             {offsetRay: {origin: {x: 0, y: 0, z: 0}, direction: {x: 0, y: 0, z: -1}}}) as BABYLON.WebXRHitTest;
-
-          // Do some plane shtuff.
-          const xrPlanes = xr.baseExperience.featuresManager.enableFeature(BABYLON.WebXRFeatureName.PLANE_DETECTION, "latest") as BABYLON.WebXRPlaneDetector;
-          console.log("Enabled plane detection.");
-          const planes: any[] = [];
-
-          xrPlanes.onPlaneAddedObservable.add(webXRPlane => {
-            if (scene.current) {
-              console.log("Plane added.");
-              let plane : any = webXRPlane;
-              webXRPlane.polygonDefinition.push(webXRPlane.polygonDefinition[0]);
-              try {
-                plane.mesh = BABYLON.MeshBuilder.CreatePolygon("plane", { shape : plane.polygonDefinition }, scene.current, earcut);              
-                let tubeMesh : BABYLON.Mesh =  BABYLON.TubeBuilder.CreateTube("tube", { path: plane.polygonDefinition, radius: 0.005, sideOrientation: BABYLON.Mesh.FRONTSIDE, updatable: true }, scene.current);
-                tubeMesh.setParent(plane.mesh);                
-                planes[plane.id] = (plane.mesh);
-                plane.mesh.material = planeMat.current;
-        
-                plane.mesh.rotationQuaternion = new BABYLON.Quaternion();
-                plane.transformationMatrix.decompose(plane.mesh.scaling, plane.mesh.rotationQuaternion, plane.mesh.position);
-              }
-              catch (ex)
-              {
-                console.error(ex);
-              }
-            }
-          });
-      
-          xrPlanes.onPlaneUpdatedObservable.add(webXRPlane => {
-            console.log("Plane updated.");
-            let plane : any = webXRPlane;
-              if (plane.mesh) {
-                  plane.mesh.dispose(false, false);
-              }
-              
-              const some = plane.polygonDefinition.some((p: any) => !p);
-              if (some) {
-                  return;
-              }
-
-              plane.polygonDefinition.push(plane.polygonDefinition[0]);
-              try {
-                plane.mesh = BABYLON.MeshBuilder.CreatePolygon("plane", { shape : plane.polygonDefinition }, scene.current, earcut);
-                let tubeMesh : BABYLON.Mesh =  BABYLON.TubeBuilder.CreateTube("tube", { path: plane.polygonDefinition, radius: 0.005, sideOrientation: BABYLON.Mesh.FRONTSIDE, updatable: true }, scene.current);
-                tubeMesh.setParent(plane.mesh);
-                planes[plane.id] = (plane.mesh);
-                plane.mesh.material = planeMat.current;
-                plane.mesh.rotationQuaternion = new BABYLON.Quaternion();
-                plane.transformationMatrix.decompose(plane.mesh.scaling, plane.mesh.rotationQuaternion, plane.mesh.position);
-                plane.mesh.receiveShadows = true;
-              }
-              catch (ex)
-              {
-                console.error(ex);
-              }
-          });
-      
-          xrPlanes.onPlaneRemovedObservable.add(webXRPlane => {
-            console.log("Plane removed.");
-            let plane : any = webXRPlane;
-              if (plane && planes[plane.id]) {
-                  planes[plane.id].dispose()
-              }
-          });
-
-          const xrAnchorModule = xr.baseExperience.featuresManager.enableFeature(
-              BABYLON.WebXRFeatureName.ANCHOR_SYSTEM,
-              "latest") as WebXRAnchorSystem;
-
-          xrAnchorModule.onAnchorAddedObservable.add(anchor => {
-            anchor.attachedNode = model.current.clone("modelClone");
-            anchor.attachedNode?.setEnabled(true);
-            console.log("anchor atttached.");
-          });
-          xrAnchorModule.onAnchorRemovedObservable.add(anchor => {
-            console.log("anchor detached.");
-          });
-
-          xrHitTestModule.onHitTestResultObservable.add((results) => {
-            if (results.length) {
-              if (!anchor.current && !anchorCreated.current)
-              {
-                /*anchorCreated.current = true;
-                xrAnchorModule.addAnchorAtPositionAndRotationAsync(results[0].position, results[0].rotationQuaternion).then((webXRAnchor : XRAnchor) => {
-                  console.log("attached anchor");
-                  anchor.current = webXRAnchor
-                 });*/
-
-                /*xrAnchorModule.addAnchorPointUsingHitTestResultAsync(results[0]).then((webXRAnchor : XRAnchor) => {
-                    console.log("attached anchor");
-                    anchor.current = webXRAnchor
-                  });*/
-              }
-
-              if (!modelPlaced.current) {
-                  setTeachingMomentVisible(true);
-                placementIndicator.current?.setEnabled(true);
-              }
-              else {
-                placementIndicator.current?.setEnabled(false);
-              }
-              
-              if (placementIndicator.current) {
-                placementIndicator.current.position = results[0].position;
-              }
-            }
-          });
-
-          const session = await xr.baseExperience.enterXRAsync("immersive-ar", "unbounded", xr.renderTarget);
-
-          setShowARControls(false);
-          model.current.setEnabled(false);
-          modelPlaced.current = false;
-          xrSession.current = session;
-          model.current.rotate(BABYLON.Vector3.Up(), 3.14159);
-        }
-      }
-    })();
-  }, [scene.current, model.current, xrSession.current]);
+  };
 
   return (
     <>
@@ -328,16 +66,6 @@ const EngineScreen: FunctionComponent<ViewProps> = (props: ViewProps) => {
         <NavBar resetClickHandler={resetClick} backClickHandler={onToggleXr} />
         <View style={{flex: 1}}>
           <EngineView style={props.style} camera={camera} displayFrameRate={false} />
-          { teachingMomentVisible &&
-            <View style={styles.teachingMomentView} pointerEvents="none">
-                <TeachingMoment teachingMomentType={TeachingMomentType.tapToPlace} />
-            </View>
-          }
-          { showARControls && 
-            <View style={styles.placementBarContainer}>
-              <CameraButton style={styles.cameraButton} cameraClickHandler={placeModel} />
-            </View>
-          }
         </View>
       </SafeAreaView>
     </>
