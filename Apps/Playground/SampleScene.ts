@@ -168,7 +168,7 @@ export class SampleScene {
 
         // Identify the touch event ID that was just added, and bind to its update event.
         this.deviceSourceManager?.getDeviceSource(deviceEventData.deviceType, deviceEventData.deviceSlot)?.onInputChangedObservable.add(inputEventData => {
-          if (inputEventData && this.model && this.modelPlaced && this.xrSession && inputEventData.previousState !== null && inputEventData.currentState !== null) {
+          if (inputEventData && this.model && this.modelPlaced && this.xrSession && inputEventData.previousState !== null && inputEventData.previousState !== 0 && inputEventData.currentState !== null && inputEventData.currentState !== 0) {
             // Calculate the differential between two states.
             const diff = inputEventData.previousState - inputEventData.currentState;
 
