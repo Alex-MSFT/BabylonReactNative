@@ -22,8 +22,6 @@ const earcut = require('earcut');
 const EngineScreen: FunctionComponent<ViewProps> = (props: ViewProps) => {
   const engine = useEngine();
   const [camera, setCamera] = useState<BABYLON.ArcRotateCamera>();
-  const model = useRef<BABYLON.AbstractMesh>();
-  const placementIndicator = useRef<BABYLON.AbstractMesh>();
   const sampleScene = useRef<SampleScene>();
   const sampleCookie = useRef<number>(sceneCookie);
 
@@ -41,14 +39,11 @@ const EngineScreen: FunctionComponent<ViewProps> = (props: ViewProps) => {
 
       // Pull all of the member variables out into our useRefs.
       setCamera(sampleScene.current.camera);
-      model.current = sampleScene.current.model;
-      placementIndicator.current = sampleScene.current.placementIndicator;
     }
   };
 
   const resetClick = () => {
-    if (sampleScene.current)
-    {
+    if (sampleScene.current) {
       sampleScene.current.resetClick();
     }
   };

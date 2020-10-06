@@ -49,12 +49,10 @@ export class SampleScene {
     this.placementIndicator.setEnabled(false);
 
     // Import a model.
-    //this.model = BABYLON.Mesh.CreateBox("box", 0.3, this.scene);
-    const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF/BoxTextured.gltf");
-    //const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://poly.googleusercontent.com/downloads/c/fp/1595152286652373/6xn1irne__S/aduhRbNxsqH/Sonic%20the%20Hedgehog.gltf");
-    //const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://poly.googleusercontent.com/downloads/c/fp/1595324547122487/4YajIweD1pN/fAfFoekkdQl/model.gltf");
+    this.model = BABYLON.Mesh.CreateBox("box", 0, this.scene);
+    //const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF/BoxTextured.gltf");
     //const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMan/glTF/CesiumMan.gltf");
-    this.model = newModel.meshes[0];
+    //this.model = newModel.meshes[0];
 
     // Position the model in front of the camera.
     const { min, max } = this.model.getHierarchyBoundingVectors(true, null);
@@ -75,6 +73,7 @@ export class SampleScene {
         if (this.model.scalingDeterminant < this.targetScale) {
           const newScale = this.targetScale * (Date.now() - startTime) / 500;
           this.model.scalingDeterminant = newScale > this.appliedScale ? this.appliedScale : newScale;
+          this.model.markAsDirty("scaling");
         }
         this.model.rotate(BABYLON.Vector3.Up(), 0.005 * this.scene.getAnimationRatio());
       }
@@ -121,6 +120,7 @@ export class SampleScene {
           if (this.model.scalingDeterminant < this.appliedScale) {
             const newScale = this.appliedScale * (Date.now() - startTime) / 500;
             this.model.scalingDeterminant = newScale > this.appliedScale ? this.appliedScale : newScale;
+            this.model.markAsDirty("scaling");
           }
 
           this.model.rotate(BABYLON.Vector3.Up(), 0.005 * this.scene.getAnimationRatio());
