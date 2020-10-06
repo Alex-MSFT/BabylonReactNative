@@ -5,11 +5,12 @@
  * @format
  */
 
+import "@babylonjs/loaders";
 import React, { useState, FunctionComponent, useEffect, useCallback } from 'react';
 import { SafeAreaView, StatusBar, Button, View, Text, ViewProps, Image } from 'react-native';
 
 import { EngineView, useEngine, EngineViewCallbacks } from '@babylonjs/react-native';
-import { Scene, Vector3, Mesh, ArcRotateCamera, Camera, PBRMetallicRoughnessMaterial, Color3, TargetCamera, WebXRSessionManager, Engine } from '@babylonjs/core';
+import { Scene, Vector3, Mesh, ArcRotateCamera, Camera, PBRMetallicRoughnessMaterial, Color3, TargetCamera, WebXRSessionManager, Engine, SceneLoader } from '@babylonjs/core';
 import Slider from '@react-native-community/slider';
 
 const EngineScreen: FunctionComponent<ViewProps> = (props: ViewProps) => {
@@ -19,12 +20,28 @@ const EngineScreen: FunctionComponent<ViewProps> = (props: ViewProps) => {
   const engine = useEngine();
   const [toggleView, setToggleView] = useState(false);
   const [camera, setCamera] = useState<Camera>();
-  const [box, setBox] = useState<Mesh>();
+  const [box, setBox] = useState<AbstractMesh>();
   const [scene, setScene] = useState<Scene>();
   const [xrSession, setXrSession] = useState<WebXRSessionManager>();
   const [scale, setScale] = useState<number>(defaultScale);
   const [snapshotData, setSnapshotData] = useState<string>();
   const [engineViewCallbacks, setEngineViewCallbacks] = useState<EngineViewCallbacks>();
+
+  const loadModel = async (scene: Scene) => {
+    const newModel = await SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF/BoxTextured.gltf");
+    const box = newModel.meshes[0];
+    //const box = Mesh.CreateBox("box", .5, scene);
+    setBox(box);
+    const mat = new PBRMetallicRoughnessMaterial("mat", scene);
+    mat.metallic = 1;
+    mat.roughness = 0.5;
+    mat.baseColor = Color3.Red();
+    box.material = mat;
+
+    scene.beforeRender = function () {
+      box.rotate(Vector3.Up(), 0.005 * scene.getAnimationRatio());
+    };
+  }
 
   useEffect(() => {
     if (engine) {
@@ -34,18 +51,7 @@ const EngineScreen: FunctionComponent<ViewProps> = (props: ViewProps) => {
       (scene.activeCamera as ArcRotateCamera).beta -= Math.PI / 8;
       setCamera(scene.activeCamera!);
       scene.createDefaultLight(true);
-
-      const box = Mesh.CreateBox("box", 0.3, scene);
-      setBox(box);
-      const mat = new PBRMetallicRoughnessMaterial("mat", scene);
-      mat.metallic = 1;
-      mat.roughness = 0.5;
-      mat.baseColor = Color3.Red();
-      box.material = mat;
-
-      scene.beforeRender = function () {
-        box.rotate(Vector3.Up(), 0.005 * scene.getAnimationRatio());
-      };
+      loadModel(scene);
     }
   }, [engine]);
 
