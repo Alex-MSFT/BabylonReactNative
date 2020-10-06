@@ -71,7 +71,7 @@ export class SampleScene {
     this.scene.beforeRender = () => {
       if (this.model && this.scene) {
         if (this.model.scalingDeterminant < this.appliedScale) {
-          const newScale = this.targetScale * (Date.now() - startTime) / 500;
+          const newScale = this.appliedScale * (Date.now() - startTime) / 500;
           this.model.scalingDeterminant = newScale > this.appliedScale ? this.appliedScale : newScale;
           this.model.markAsDirty("scaling");
         }
@@ -79,14 +79,8 @@ export class SampleScene {
       }
     };
 
-    this.planeTexture = new BABYLON.Texture('https://i.imgur.com/z7s3C5B.png', this.scene);
-    this.planeTexture.hasAlpha = true;
-    this.planeTexture.uScale = 3;
-    this.planeTexture.vScale = 3;
-    this.planeTexture.coordinatesMode = BABYLON.Texture.PROJECTION_MODE;
-
     this.planeMat = new BABYLON.StandardMaterial('noLight', this.scene);
-    this.planeMat.diffuseTexture = this.planeTexture;
+    this.planeMat.alpha = .5;
 
     this.createInputHandling();
   };
@@ -259,8 +253,6 @@ export class SampleScene {
               plane.polygonDefinition.push(plane.polygonDefinition[0]);
               try {
                 plane.mesh = BABYLON.MeshBuilder.CreatePolygon("plane", { shape : plane.polygonDefinition }, this.scene, this.earcut);
-                let tubeMesh : BABYLON.Mesh =  BABYLON.TubeBuilder.CreateTube("tube", { path: plane.polygonDefinition, radius: 0.005, sideOrientation: BABYLON.Mesh.FRONTSIDE, updatable: true }, this.scene);
-                tubeMesh.setParent(plane.mesh);
                 planes[plane.id] = (plane.mesh);
                 plane.mesh.material = this.planeMat;
                 plane.mesh.rotationQuaternion = new BABYLON.Quaternion();
