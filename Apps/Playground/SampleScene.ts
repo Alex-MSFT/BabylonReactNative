@@ -49,7 +49,7 @@ export class SampleScene {
     this.placementIndicator.setEnabled(false);
 
     // Import a model.
-    this.model = BABYLON.Mesh.CreateBox("box", 0, this.scene);
+    this.model = BABYLON.Mesh.CreateBox("box", 0.3, this.scene);
     //const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF/BoxTextured.gltf");
     //const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMan/glTF/CesiumMan.gltf");
     //this.model = newModel.meshes[0];
@@ -70,7 +70,7 @@ export class SampleScene {
     const startTime = Date.now();
     this.scene.beforeRender = () => {
       if (this.model && this.scene) {
-        if (this.model.scalingDeterminant < this.targetScale) {
+        if (this.model.scalingDeterminant < this.appliedScale) {
           const newScale = this.targetScale * (Date.now() - startTime) / 500;
           this.model.scalingDeterminant = newScale > this.appliedScale ? this.appliedScale : newScale;
           this.model.markAsDirty("scaling");
