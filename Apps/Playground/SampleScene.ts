@@ -225,8 +225,6 @@ export class SampleScene {
               webXRPlane.polygonDefinition.push(webXRPlane.polygonDefinition[0]);
               try {
                 plane.mesh = BABYLON.MeshBuilder.CreatePolygon("plane", { shape : plane.polygonDefinition }, this.scene, this.earcut);
-                let tubeMesh : BABYLON.Mesh =  BABYLON.TubeBuilder.CreateTube("tube", { path: plane.polygonDefinition, radius: 0.005, sideOrientation: BABYLON.Mesh.FRONTSIDE, updatable: true }, this.scene);
-                tubeMesh.setParent(plane.mesh);
                 planes[plane.id] = (plane.mesh);
                 plane.mesh.material = this.planeMat;
 
