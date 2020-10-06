@@ -133,7 +133,7 @@ export class SampleScene {
       const {min} = this.model.getHierarchyBoundingVectors(true);
       this.model.setEnabled(true);
       this.model.position = this.placementIndicator.position.clone();
-      this.model.position.y -= min.y;
+      this.model.position.y -= min.y + .02;
       this.model.scalingDeterminant = 0;
 
       const startTime = Date.now();
