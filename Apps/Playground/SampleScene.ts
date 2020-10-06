@@ -12,7 +12,7 @@ export class SampleScene {
   camera: BABYLON.ArcRotateCamera | undefined;
   model: BABYLON.AbstractMesh | undefined;
   placementIndicator: BABYLON.AbstractMesh | undefined;
-  targetScale: number = 1;
+  targetScale: number = .5;
   appliedScale: number = 1;
   xrSession: BABYLON.WebXRSessionManager | undefined;
   planeTexture: BABYLON.Texture | undefined;
@@ -50,11 +50,10 @@ export class SampleScene {
 
     // Import a model.
     //this.model = BABYLON.Mesh.CreateBox("box", 0.3, this.scene);
-    //const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF/BoxTextured.gltf");
+    const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF/BoxTextured.gltf");
     //const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://poly.googleusercontent.com/downloads/c/fp/1595152286652373/6xn1irne__S/aduhRbNxsqH/Sonic%20the%20Hedgehog.gltf");
     //const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://poly.googleusercontent.com/downloads/c/fp/1595324547122487/4YajIweD1pN/fAfFoekkdQl/model.gltf");
-    const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMan/glTF/CesiumMan.gltf");
-    console.error("loaded model.");
+    //const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMan/glTF/CesiumMan.gltf");
     this.model = newModel.meshes[0];
 
     // Position the model in front of the camera.
@@ -136,6 +135,8 @@ export class SampleScene {
       this.modelPlaced = true;
       this.model.rotationQuaternion = BABYLON.Quaternion.Identity();
       this.placementIndicator.setEnabled(false);
+
+      const {min} = this.model.getHierarchyBoundingVectors();
       this.model.setEnabled(true);
       this.model.position = this.placementIndicator.position.clone();
       this.model.scalingDeterminant = 0;
@@ -225,7 +226,6 @@ export class SampleScene {
 
           xrPlanes.onPlaneAddedObservable.add(webXRPlane => {
             if (this.scene) {
-              console.log("Plane added.");
               let plane : any = webXRPlane;
               webXRPlane.polygonDefinition.push(webXRPlane.polygonDefinition[0]);
               try {
@@ -246,7 +246,6 @@ export class SampleScene {
           });
 
           xrPlanes.onPlaneUpdatedObservable.add(webXRPlane => {
-            console.log("Plane updated.");
             let plane : any = webXRPlane;
               if (plane.mesh) {
                   plane.mesh.dispose(false, false);
