@@ -49,10 +49,10 @@ export class SampleScene {
     this.placementIndicator.setEnabled(false);
 
     // Import a model.
-    this.model = BABYLON.Mesh.CreateBox("box", 0.3, this.scene);
+    //this.model = BABYLON.Mesh.CreateBox("box", 0.3, this.scene);
     //const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF/BoxTextured.gltf");
-    //const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMan/glTF/CesiumMan.gltf");
-    //this.model = newModel.meshes[0];
+    const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMan/glTF/CesiumMan.gltf");
+    this.model = newModel.meshes[0];
 
     // Position the model in front of the camera.
     const { min, max } = this.model.getHierarchyBoundingVectors(true, null);
@@ -130,9 +130,10 @@ export class SampleScene {
       this.model.rotationQuaternion = BABYLON.Quaternion.Identity();
       this.placementIndicator.setEnabled(false);
 
-      const {min} = this.model.getHierarchyBoundingVectors();
+      const {min} = this.model.getHierarchyBoundingVectors(true);
       this.model.setEnabled(true);
       this.model.position = this.placementIndicator.position.clone();
+      this.model.position.y -= min.y;
       this.model.scalingDeterminant = 0;
 
       const startTime = Date.now();
