@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable quotes */
 import * as BABYLON from '@babylonjs/core';
+import { MaxBlock } from "@babylonjs/core";
 import "@babylonjs/loaders";
 export const sceneCookie = 1;
 
@@ -50,8 +51,8 @@ export class SampleScene {
 
     // Import a model.
     //this.model = BABYLON.Mesh.CreateBox("box", 0.3, this.scene);
-    //const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF/BoxTextured.gltf");
-    const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMan/glTF/CesiumMan.gltf");
+    const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF/BoxTextured.gltf");
+    //const newModel = await BABYLON.SceneLoader.ImportMeshAsync("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMan/glTF/CesiumMan.gltf");
     this.model = newModel.meshes[0];
 
     // Position the model in front of the camera.
@@ -80,7 +81,7 @@ export class SampleScene {
     };
 
     this.planeMat = new BABYLON.StandardMaterial('noLight', this.scene);
-    this.planeMat.alpha = .5;
+    this.planeMat.alpha = .2;
 
     this.createInputHandling();
   };
@@ -130,10 +131,10 @@ export class SampleScene {
       this.model.rotationQuaternion = BABYLON.Quaternion.Identity();
       this.placementIndicator.setEnabled(false);
 
-      const {min} = this.model.getHierarchyBoundingVectors(true);
       this.model.setEnabled(true);
       this.model.position = this.placementIndicator.position.clone();
-      this.model.position.y -= min.y + .02;
+      const { min } = this.model.getHierarchyBoundingVectors(true);
+      this.model.position.y += this.model.getAbsolutePosition().y - min.y;
       this.model.scalingDeterminant = 0;
 
       const startTime = Date.now();
@@ -153,13 +154,13 @@ export class SampleScene {
         this.deviceSourceManager = new BABYLON.DeviceSourceManager(this.engine);
       }
 
-      this.deviceSourceManager.onAfterDeviceConnectedObservable.clear();
-      this.deviceSourceManager.onAfterDeviceDisconnectedObservable.clear();
+      this.deviceSourceManager.onDeviceConnectedObservable.clear();
+      this.deviceSourceManager.onDeviceDisconnectedObservable.clear();
 
       var numInputs = 0;
 
       // Bind touch event.
-      this.deviceSourceManager.onAfterDeviceConnectedObservable.add(deviceEventData => {
+      this.deviceSourceManager.onDeviceConnectedObservable.add(deviceEventData => {
         numInputs++;
 
         // Identify the touch event ID that was just added, and bind to its update event.
@@ -189,7 +190,7 @@ export class SampleScene {
         this.placeModel();
       });
 
-      this.deviceSourceManager.onAfterDeviceDisconnectedObservable.add(_deviceEventData => {
+      this.deviceSourceManager.onDeviceDisconnectedObservable.add(_deviceEventData => {
         numInputs--;
       });
     }
