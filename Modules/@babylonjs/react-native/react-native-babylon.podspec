@@ -33,14 +33,15 @@ Pod::Spec.new do |s|
                 'napi',
                 'NativeEngine',
                 'NativeInput',
-                'NativeWindow',
                 'NativeXR',
                 'SPIRV',
                 'spirv-cross-core',
                 'spirv-cross-glsl',
                 'spirv-cross-hlsl',
                 'spirv-cross-msl',
+                'UrlLib',
                 'Window',
+                'XMLHttpRequest',
                 'xr'
 
   s.frameworks = "MetalKit", "ARKit"

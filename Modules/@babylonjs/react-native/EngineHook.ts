@@ -67,30 +67,23 @@ export function useEngine(): Engine | undefined {
 
     useEffect(() => {
         let disposed = false;
+        let engine: Engine | undefined = undefined;
 
         (async () => {
             if (await BabylonModule.initialize() && !disposed)
             {
-                setEngine(new NativeEngine());
+                engine = BabylonModule.createEngine();
+                setEngine(engine);
             }
         })();
 
-        // NOTE: This is a workaround for https://github.com/BabylonJS/BabylonReactNative/issues/60
-        function heartbeat() {
-            if (!disposed) {
-                setTimeout(heartbeat, 10);
-            }
-        }
-        heartbeat();
-
         return () => {
             disposed = true;
-            setEngine(engine => {
-                if (engine) {
-                    DisposeEngine(engine);
-                }
-                return undefined;
-            });
+            // NOTE: Do not use setEngine with a callback to dispose the engine instance as that callback does not get called during component unmount when compiled in release.
+            if (engine) {
+                DisposeEngine(engine);
+            }
+            setEngine(undefined);
         };
     }, []);
 

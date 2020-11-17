@@ -18,14 +18,15 @@ set(PACKAGED_LIBS
     napi
     NativeEngine
     NativeInput
-    NativeWindow
     NativeXr
     SPIRV
     spirv-cross-core
     spirv-cross-glsl
     spirv-cross-hlsl
     spirv-cross-msl
+    UrlLib
     Window
+    XMLHttpRequest
     xr
 )
 
