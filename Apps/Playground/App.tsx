@@ -45,7 +45,8 @@ import {
   Nullable,
   Tools,
   StandardMaterial,
-  DynamicTexture
+  DynamicTexture,
+  Mesh
 } from '@babylonjs/core';
 import {GUI3DManager, HolographicButton, PlanePanel, TouchButton3D} from '@babylonjs/gui/3D';
 import '@babylonjs/loaders';
@@ -170,20 +171,22 @@ const EngineScreen: FunctionComponent<ViewProps> = (props: ViewProps) => {
     };
 
     loadFont().then(() => {
-      setTimeout(() => {
-        //const mat = new StandardMaterial('Name', scene);
-        //const texture = new DynamicTexture("testText", )
-        //mat.diffuseTexture = new DynamicTexture("TestText", )
-        const node = new TransformNode('TestNode', scene);
-        const manager = new GUI3DManager(scene);
-        const panel = new PlanePanel('Panel');
-        panel.margin = 0.2;
-        manager.addControl(panel);
-        panel.linkToTransformNode(node);
-        const button = new HolographicButton('Test');
-        button.text = 'test';
-        panel.addControl(button);
-      }, 20000);
+      /*const mat = new StandardMaterial('Name', scene);
+      const texture = new DynamicTexture('testText', { width: 50, height: 50 }, scene);
+      texture.drawText('TestText', null, null, '', 'black', 'white', true, true);
+      mat.diffuseTexture = texture;
+      const plane = Mesh.CreatePlane('testPlane', 5, scene, true);
+      plane.material = mat;
+      plane.position.z = 3;*/
+      const node = new TransformNode('TestNode', scene);
+      const manager = new GUI3DManager(scene);
+      const panel = new PlanePanel('Panel');
+      panel.margin = 0.2;
+      manager.addControl(panel);
+      panel.linkToTransformNode(node);
+      const button = new HolographicButton('Test');
+      button.text = 'test';
+      panel.addControl(button);
     });
   }, [scene]);
 
